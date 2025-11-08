@@ -26,7 +26,8 @@ const Profile = () => {
         setCurrentUserId(session.user.id);
       }
       
-      // If userId param exists, view that profile, otherwise view own profile or redirect to auth
+      // If userId param exists, view that profile (anyone can view)
+      // If no userId param, show own profile if logged in, otherwise redirect to auth
       let profileId = userId;
       if (!userId) {
         if (session) {
@@ -46,8 +47,13 @@ const Profile = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
         setCurrentUserId(session.user.id);
+        // Update isOwnProfile when auth state changes
+        if (userId) {
+          setIsOwnProfile(session.user.id === userId);
+        }
       } else {
         setCurrentUserId('');
+        setIsOwnProfile(false);
       }
     });
 
