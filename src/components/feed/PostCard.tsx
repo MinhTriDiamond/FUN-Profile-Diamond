@@ -104,7 +104,7 @@ export const PostCard = ({ post, currentUserId, onPostDeleted }: PostCardProps) 
         <CardHeader className="flex flex-row items-center gap-2 sm:gap-4 px-4 sm:px-6 py-3 sm:py-6">
           <Avatar className="cursor-pointer w-8 h-8 sm:w-10 sm:h-10" onClick={handleProfileClick}>
             {post.profiles.avatar_url && <AvatarImage src={post.profiles.avatar_url} />}
-            <AvatarFallback>{post.profiles.username[0].toUpperCase()}</AvatarFallback>
+            <AvatarFallback>{post.profiles.username?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <h3 
