@@ -42,9 +42,7 @@ const Feed = () => {
         .from('posts')
         .select(`
           *,
-          profiles!posts_user_id_fkey (username, avatar_url),
-          reactions (id, user_id),
-          comments (id)
+          profiles!posts_user_id_fkey (username, avatar_url)
         `)
         .order('created_at', { ascending: false });
 
