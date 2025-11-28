@@ -22,6 +22,15 @@ import About from "./pages/About";
 import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 
+import TestR2Upload from "./components/TestR2Upload";
+
+function App() {
+  return (
+    <div>
+      <TestR2Upload />
+    </div>
+  );
+}
 const queryClient = new QueryClient();
 
 const App = () => (
