@@ -23,9 +23,6 @@ import About from "./pages/About";
 import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 
-// Test R2 (bỏ khi xong test)
-import TestR2Upload from "./components/TestR2Upload";
-
 const queryClient = new QueryClient();
 
 function App() {
@@ -39,10 +36,6 @@ function App() {
                 <TooltipProvider>
                   <Toaster />
                   <Sonner />
-
-                  {/* BỎ COMMENT DÒNG NÀY KHI MUỐN TEST R2 */}
-                  {/* <TestR2Upload /> */}
-
                   <BrowserRouter>
                     <Routes>
                       <Route path="/auth" element={<Auth />} />
