@@ -43,101 +43,155 @@ Deno.serve(async (req) => {
 
     const { bucket, limit = 100, dryRun = false, updateDatabase = true } = await req.json();
     
-    const bucketsToProcess = bucket ? [bucket] : ['posts', 'avatars', 'videos', 'comment-media'];
     const results: MigrationResult[] = [];
 
-    console.log(`Starting migration - Dry Run: ${dryRun}, Buckets: ${bucketsToProcess.join(', ')}, Limit: ${limit}`);
+    console.log(`Starting migration - Dry Run: ${dryRun}, Limit: ${limit}`);
 
-    for (const bucketName of bucketsToProcess) {
-      console.log(`Processing bucket: ${bucketName}`);
-      
-      const { data: files, error: listError } = await supabaseAdmin.storage
-        .from(bucketName)
-        .list('', {
-          limit: limit,
-          sortBy: { column: 'created_at', order: 'desc' }
-        });
+    // Get all active URLs from database
+    const urlsToMigrate: { url: string; bucket: string; path: string }[] = [];
 
-      if (listError) {
-        console.error(`Error listing files in ${bucketName}:`, listError);
-        continue;
+    // Get posts images and videos
+    const { data: posts } = await supabaseAdmin
+      .from('posts')
+      .select('image_url, video_url')
+      .limit(limit);
+
+    if (posts) {
+      for (const post of posts) {
+        if (post.image_url && post.image_url.includes('supabase.co/storage')) {
+          const match = post.image_url.match(/\/posts\/(.+)$/);
+          if (match) {
+            urlsToMigrate.push({ url: post.image_url, bucket: 'posts', path: match[1] });
+          }
+        }
+        if (post.video_url && post.video_url.includes('supabase.co/storage')) {
+          const match = post.video_url.match(/\/videos\/(.+)$/);
+          if (match) {
+            urlsToMigrate.push({ url: post.video_url, bucket: 'videos', path: match[1] });
+          }
+        }
       }
+    }
 
-      console.log(`Found ${files?.length || 0} files in ${bucketName}`);
+    // Get avatars and covers
+    const { data: profiles } = await supabaseAdmin
+      .from('profiles')
+      .select('avatar_url, cover_url')
+      .limit(limit);
 
-      for (const file of files || []) {
-        if (!file.name || file.name.endsWith('/')) continue;
+    if (profiles) {
+      for (const profile of profiles) {
+        if (profile.avatar_url && profile.avatar_url.includes('supabase.co/storage')) {
+          const match = profile.avatar_url.match(/\/avatars\/(.+)$/);
+          if (match) {
+            urlsToMigrate.push({ url: profile.avatar_url, bucket: 'avatars', path: match[1] });
+          }
+        }
+        if (profile.cover_url && profile.cover_url.includes('supabase.co/storage')) {
+          const match = profile.cover_url.match(/\/avatars\/(.+)$/);
+          if (match) {
+            urlsToMigrate.push({ url: profile.cover_url, bucket: 'avatars', path: match[1] });
+          }
+        }
+      }
+    }
 
-        try {
-          // Download from Supabase
-          const { data: fileData, error: downloadError } = await supabaseAdmin.storage
-            .from(bucketName)
-            .download(file.name);
+    // Get comment media
+    const { data: comments } = await supabaseAdmin
+      .from('comments')
+      .select('image_url, video_url')
+      .limit(limit);
 
-          if (downloadError) throw downloadError;
+    if (comments) {
+      for (const comment of comments) {
+        if (comment.image_url && comment.image_url.includes('supabase.co/storage')) {
+          const match = comment.image_url.match(/\/comment-media\/(.+)$/);
+          if (match) {
+            urlsToMigrate.push({ url: comment.image_url, bucket: 'comment-media', path: match[1] });
+          }
+        }
+        if (comment.video_url && comment.video_url.includes('supabase.co/storage')) {
+          const match = comment.video_url.match(/\/comment-media\/(.+)$/);
+          if (match) {
+            urlsToMigrate.push({ url: comment.video_url, bucket: 'comment-media', path: match[1] });
+          }
+        }
+      }
+    }
 
-          const originalUrl = `${Deno.env.get('SUPABASE_URL')}/storage/v1/object/public/${bucketName}/${file.name}`;
-          
-          if (!dryRun) {
-            // Upload to Cloudflare R2
-            const r2Key = `${bucketName}/${file.name}`;
-            await uploadToR2(
-              fileData,
-              r2Key,
-              file.metadata?.mimetype || 'application/octet-stream',
-              CLOUDFLARE_ACCOUNT_ID,
-              CLOUDFLARE_ACCESS_KEY_ID,
-              CLOUDFLARE_SECRET_ACCESS_KEY,
-              CLOUDFLARE_R2_BUCKET_NAME
-            );
+    console.log(`Found ${urlsToMigrate.length} files to migrate from database`);
 
-            const newUrl = `${CLOUDFLARE_R2_PUBLIC_URL}/${r2Key}`;
+    // Process each file
+    for (const { url: originalUrl, bucket: bucketName, path: filePath } of urlsToMigrate) {
+      try {
+        // Download from Supabase
+        const { data: fileData, error: downloadError } = await supabaseAdmin.storage
+          .from(bucketName)
+          .download(filePath);
 
-            // Update database URLs
-            if (updateDatabase) {
-              await updateDatabaseUrls(supabaseAdmin, bucketName, file.name, originalUrl, newUrl);
-            }
+        if (downloadError) {
+          console.log(`Skipping ${filePath}: ${downloadError.message}`);
+          continue;
+        }
+        
+        if (!dryRun) {
+          // Upload to Cloudflare R2
+          const r2Key = `${bucketName}/${filePath}`;
+          await uploadToR2(
+            fileData,
+            r2Key,
+            'image/jpeg', // Default content type
+            CLOUDFLARE_ACCOUNT_ID,
+            CLOUDFLARE_ACCESS_KEY_ID,
+            CLOUDFLARE_SECRET_ACCESS_KEY,
+            CLOUDFLARE_R2_BUCKET_NAME
+          );
 
-            console.log(`Migrated: ${bucketName}/${file.name}`);
-            
-            results.push({
-              bucket: bucketName,
-              path: file.name,
-              originalUrl,
-              newUrl,
-              status: 'success'
-            });
-          } else {
-            const newUrl = `${CLOUDFLARE_R2_PUBLIC_URL}/${bucketName}/${file.name}`;
-            results.push({
-              bucket: bucketName,
-              path: file.name,
-              originalUrl,
-              newUrl,
-              status: 'success',
-              message: 'Dry run - not uploaded'
-            });
+          const newUrl = `${CLOUDFLARE_R2_PUBLIC_URL}/${r2Key}`;
+
+          // Update database URLs
+          if (updateDatabase) {
+            await updateDatabaseUrls(supabaseAdmin, bucketName, filePath, originalUrl, newUrl);
           }
 
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          console.error(`Error processing ${file.name}:`, errorMessage);
+          console.log(`Migrated: ${bucketName}/${filePath}`);
+          
           results.push({
             bucket: bucketName,
-            path: file.name,
-            originalUrl: '',
-            newUrl: '',
-            status: 'error',
-            message: errorMessage
+            path: filePath,
+            originalUrl,
+            newUrl,
+            status: 'success'
+          });
+        } else {
+          const newUrl = `${CLOUDFLARE_R2_PUBLIC_URL}/${bucketName}/${filePath}`;
+          results.push({
+            bucket: bucketName,
+            path: filePath,
+            originalUrl,
+            newUrl,
+            status: 'success',
+            message: 'Dry run - not uploaded'
           });
         }
+
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error(`Error processing ${filePath}:`, errorMessage);
+        results.push({
+          bucket: bucketName,
+          path: filePath,
+          originalUrl,
+          newUrl: '',
+          status: 'error',
+          message: errorMessage
+        });
       }
     }
 
     const summary = {
       dryRun,
       updateDatabase,
-      bucketsProcessed: bucketsToProcess,
       totalFiles: results.length,
       successful: results.filter(r => r.status === 'success').length,
       errors: results.filter(r => r.status === 'error').length,
