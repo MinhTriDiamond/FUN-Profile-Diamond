@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
       throw new Error('Missing Cloudflare R2 configuration');
     }
 
-    const { bucket, limit = 100, dryRun = false, updateDatabase = true } = await req.json();
+    const { bucket, limit = 50, dryRun = false, updateDatabase = true } = await req.json();
     
     const results: MigrationResult[] = [];
 
@@ -134,11 +134,33 @@ Deno.serve(async (req) => {
           continue;
         }
         
+        // Skip files larger than 10MB to avoid memory issues
+        if (fileData.size > 10 * 1024 * 1024) {
+          console.log(`Skipping ${filePath}: File too large (${(fileData.size / 1024 / 1024).toFixed(2)}MB)`);
+          results.push({
+            bucket: bucketName,
+            path: filePath,
+            originalUrl,
+            newUrl: '',
+            status: 'error',
+            message: 'File too large (>10MB), skipped'
+          });
+          continue;
+        }
+        
         if (!dryRun) {
-          // Convert file to base64
+          // Convert file to base64 using chunk-based approach
           const arrayBuffer = await fileData.arrayBuffer();
           const bytes = new Uint8Array(arrayBuffer);
-          const base64 = btoa(String.fromCharCode(...bytes));
+          
+          // Convert to base64 in chunks to avoid stack overflow
+          let base64 = '';
+          const chunkSize = 8192;
+          for (let i = 0; i < bytes.length; i += chunkSize) {
+            const chunk = bytes.subarray(i, i + chunkSize);
+            base64 += String.fromCharCode.apply(null, Array.from(chunk));
+          }
+          base64 = btoa(base64);
           
           // Get content type
           const contentType = fileData.type || 'application/octet-stream';
