@@ -5,6 +5,8 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Trophy, Medal, Award } from 'lucide-react';
+import { LeftSidebar } from '@/components/feed/LeftSidebar';
+import { HonorBoard } from '@/components/feed/HonorBoard';
 
 interface LeaderboardUser {
   id: string;
@@ -147,9 +149,16 @@ const Leaderboard = () => {
 
       <Navbar />
       <main className="fixed top-28 left-0 right-0 bottom-0 overflow-hidden">
-        <div className="container mx-auto px-4 h-full max-w-4xl">
-          <div className="scroll-container h-full pb-6">
-            <div className="glass-card-light p-6 rounded-2xl">
+        <div className="container mx-auto px-4 h-full max-w-7xl" style={{ minWidth: '1200px' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+            {/* Left Sidebar - Hidden on mobile */}
+            <aside className="hidden lg:block lg:col-span-3 scroll-container pb-6 h-full">
+              <LeftSidebar />
+            </aside>
+
+            {/* Main Content - Center */}
+            <div className="lg:col-span-6 scroll-container pb-6">
+              <div className="glass-card-light p-6 rounded-2xl">
               <div className="mb-6">
                 <h1 className="text-3xl font-bold text-foreground mb-2">🏆 Bảng Xếp Hạng Tổng Thưởng</h1>
                 <p className="text-muted-foreground">Danh sách người dùng có tổng Camly Coin cao nhất</p>
@@ -203,8 +212,14 @@ const Leaderboard = () => {
               );
             })}
             </div>
-          )}
+            )}
+              </div>
             </div>
+
+            {/* Right Sidebar - Hidden on mobile */}
+            <aside className="hidden lg:block lg:col-span-3 scroll-container pb-6 h-full">
+              <HonorBoard />
+            </aside>
           </div>
         </div>
       </main>

@@ -11,6 +11,7 @@ import { PostCard } from '@/components/feed/PostCard';
 import { FriendRequestButton } from '@/components/friends/FriendRequestButton';
 import { FriendsList } from '@/components/friends/FriendsList';
 import { ProfileHonorBoard } from '@/components/profile/ProfileHonorBoard';
+import { LeftSidebar } from '@/components/feed/LeftSidebar';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -161,10 +162,15 @@ const Profile = () => {
 
       <Navbar />
       <main className="fixed top-28 left-0 right-0 bottom-0 overflow-hidden">
-        <div className="container mx-auto px-4 sm:px-6 h-full max-w-7xl">
+        <div className="container mx-auto px-4 sm:px-6 h-full max-w-7xl" style={{ minWidth: '1200px' }}>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
-          {/* Main Content - Left Side */}
-          <div className="lg:col-span-8 scroll-container pb-6">
+          {/* Left Sidebar - Hidden on mobile */}
+          <aside className="hidden lg:block lg:col-span-3 scroll-container pb-6 h-full">
+            <LeftSidebar />
+          </aside>
+
+          {/* Main Content - Center */}
+          <div className="lg:col-span-6 scroll-container pb-6">
             <div className="mb-6 sm:mb-8">
               <Card className="overflow-hidden glass-card-light border-2 border-gold">
             {profile?.cover_url && (
@@ -254,13 +260,13 @@ const Profile = () => {
           </div>
 
           {/* Honor Board - Right Side */}
-          <div className="lg:col-span-4 hidden lg:block scroll-container pb-6">
+          <aside className="hidden lg:block lg:col-span-3 scroll-container pb-6 h-full">
             <ProfileHonorBoard
               userId={profile.id}
               username={profile.username}
               avatarUrl={profile.avatar_url}
             />
-          </div>
+          </aside>
           </div>
         </div>
       </main>
