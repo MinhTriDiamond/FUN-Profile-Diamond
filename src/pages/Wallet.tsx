@@ -8,6 +8,8 @@ import { MetamaskAssetsTab } from '@/components/wallet/MetamaskAssetsTab';
 import { ReceiveTab } from '@/components/wallet/ReceiveTab';
 import { SendTab } from '@/components/wallet/SendTab';
 import { HistoryTab } from '@/components/wallet/HistoryTab';
+import { LeftSidebar } from '@/components/feed/LeftSidebar';
+import { HonorBoard } from '@/components/feed/HonorBoard';
 
 const Wallet = () => {
   const navigate = useNavigate();
@@ -49,8 +51,15 @@ const Wallet = () => {
 
       <Navbar />
       <main className="fixed top-28 left-0 right-0 bottom-0 overflow-hidden">
-        <div className="container mx-auto px-4 h-full max-w-md">
-          <div className="scroll-container h-full pb-6">
+        <div className="container mx-auto px-4 h-full max-w-7xl" style={{ minWidth: '1200px' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+            {/* Left Sidebar - Hidden on mobile */}
+            <aside className="hidden lg:block lg:col-span-3 scroll-container pb-6 h-full">
+              <LeftSidebar />
+            </aside>
+
+            {/* Main Content - Center */}
+            <div className="lg:col-span-6 scroll-container pb-6">
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-xl font-bold flex items-center gap-2">
                 <img 
@@ -113,6 +122,12 @@ const Wallet = () => {
               </div>
             </div>
           </div>
+
+          {/* Right Sidebar - Hidden on mobile */}
+          <aside className="hidden lg:block lg:col-span-3 scroll-container pb-6 h-full">
+            <HonorBoard />
+          </aside>
+        </div>
         </div>
       </main>
     </div>

@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { LeftSidebar } from '@/components/feed/LeftSidebar';
+import { HonorBoard } from '@/components/feed/HonorBoard';
 
 const About = () => {
   const navigate = useNavigate();
@@ -24,18 +26,25 @@ const About = () => {
 
       <Navbar />
       <main className="fixed top-28 left-0 right-0 bottom-0 overflow-hidden">
-        <div className="container mx-auto px-4 h-full max-w-4xl">
-          <div className="scroll-container h-full pb-6">
-            <Button
-              variant="ghost"
-              onClick={() => navigate(-1)}
-              className="mb-6 text-primary-dark hover:text-primary hover:bg-primary/10"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Quay lại
-            </Button>
+        <div className="container mx-auto px-4 h-full max-w-7xl" style={{ minWidth: '1200px' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+            {/* Left Sidebar - Hidden on mobile */}
+            <aside className="hidden lg:block lg:col-span-3 scroll-container pb-6 h-full">
+              <LeftSidebar />
+            </aside>
 
-            <Card className="glass-card-light border-2 border-gold">
+            {/* Main Content - Center */}
+            <div className="lg:col-span-6 scroll-container pb-6">
+              <Button
+                variant="ghost"
+                onClick={() => navigate(-1)}
+                className="mb-6 text-primary-dark hover:text-primary hover:bg-primary/10"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Quay lại
+              </Button>
+
+              <Card className="glass-card-light border-2 border-gold">
           <CardHeader className="pb-3">
             <CardTitle className="text-2xl font-bold flex items-center gap-2">
               <Info className="w-6 h-6 text-primary" />
@@ -95,7 +104,13 @@ const About = () => {
             <p className="pt-4 font-medium">Với F.U. Profile, bạn không chỉ tham gia một mạng xã hội Web3, mà còn bước vào một không gian số thông minh, nơi AI và blockchain kết hợp để biến mọi ý tưởng thành tài sản thực sự. Đây chính là tương lai của mạng xã hội – nơi giá trị cá nhân và tài sản trí tuệ được tối ưu hóa và bảo vệ mãi mãi.</p>
             </CardContent>
           </Card>
-          </div>
+        </div>
+
+        {/* Right Sidebar - Hidden on mobile */}
+        <aside className="hidden lg:block lg:col-span-3 scroll-container pb-6 h-full">
+          <HonorBoard />
+        </aside>
+      </div>
         </div>
       </main>
     </div>

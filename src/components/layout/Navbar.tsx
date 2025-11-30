@@ -78,13 +78,13 @@ export const Navbar = () => {
         </div>
 
         {/* Center: Logo */}
-        <div className="absolute left-1/2 -translate-x-1/2 -top-6">
+        <div className="absolute left-1/2 -translate-x-1/2 -top-8">
           <div className="relative">
             <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse-glow" />
             <img
               src="/fun-profile-logo.jpg"
               alt="FUN"
-              className="relative w-20 h-20 rounded-full border-4 border-white shadow-xl cursor-pointer hover:scale-110 transition-transform"
+              className="relative w-24 h-24 rounded-full border-4 border-white shadow-xl cursor-pointer hover:scale-110 transition-transform"
               onClick={() => navigate('/')}
             />
           </div>

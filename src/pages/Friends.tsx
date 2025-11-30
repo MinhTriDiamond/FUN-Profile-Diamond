@@ -4,6 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Navbar } from '@/components/layout/Navbar';
 import { FriendsList } from '@/components/friends/FriendsList';
 import { Skeleton } from '@/components/ui/skeleton';
+import { LeftSidebar } from '@/components/feed/LeftSidebar';
+import { HonorBoard } from '@/components/feed/HonorBoard';
 
 const Friends = () => {
   const navigate = useNavigate();
@@ -78,12 +80,25 @@ const Friends = () => {
 
       <Navbar />
       <main className="fixed top-28 left-0 right-0 bottom-0 overflow-hidden">
-        <div className="container mx-auto px-4 h-full max-w-4xl">
-          <div className="scroll-container h-full pb-6">
-            <div className="glass-card-light p-6 rounded-2xl">
-              <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-foreground">Friends</h1>
-              <FriendsList userId={currentUserId} />
+        <div className="container mx-auto px-4 h-full max-w-7xl" style={{ minWidth: '1200px' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+            {/* Left Sidebar - Hidden on mobile */}
+            <aside className="hidden lg:block lg:col-span-3 scroll-container pb-6 h-full">
+              <LeftSidebar />
+            </aside>
+
+            {/* Main Content - Center */}
+            <div className="lg:col-span-6 scroll-container pb-6">
+              <div className="glass-card-light p-6 rounded-2xl">
+                <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-foreground">Friends</h1>
+                <FriendsList userId={currentUserId} />
+              </div>
             </div>
+
+            {/* Right Sidebar - Hidden on mobile */}
+            <aside className="hidden lg:block lg:col-span-3 scroll-container pb-6 h-full">
+              <HonorBoard />
+            </aside>
           </div>
         </div>
       </main>

@@ -160,7 +160,7 @@ export const HonorBoard = () => {
   );
 
   return (
-    <div className="sticky top-20 rounded-2xl overflow-hidden border-2 border-gold bg-white shadow-gold-glow animate-gold-pulse">
+    <div className="sticky top-20 rounded-2xl overflow-hidden border-2 border-gold bg-white shadow-gold-glow animate-gold-pulse h-full">
       {/* Sparkle effects */}
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="absolute top-2 left-2 w-1 h-1 bg-gold rounded-full animate-pulse"></div>

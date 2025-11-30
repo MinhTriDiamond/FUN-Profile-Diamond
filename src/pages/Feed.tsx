@@ -76,10 +76,10 @@ const Feed = () => {
       <Navbar />
       
       <main className="fixed top-28 left-0 right-0 bottom-0 overflow-hidden">
-        <div className="container mx-auto px-4 h-full max-w-7xl">
+        <div className="container mx-auto px-4 h-full max-w-7xl" style={{ minWidth: '1200px' }}>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
             {/* Left Sidebar - Hidden on mobile */}
-            <aside className="hidden lg:block lg:col-span-3 scroll-container pb-6">
+            <aside className="hidden lg:block lg:col-span-3 scroll-container pb-6 h-full">
               <LeftSidebar />
             </aside>
 
@@ -120,7 +120,7 @@ const Feed = () => {
             </div>
 
             {/* Right Sidebar - Hidden on mobile */}
-            <aside className="hidden lg:block lg:col-span-3 scroll-container pb-6">
+            <aside className="hidden lg:block lg:col-span-3 scroll-container pb-6 h-full">
               <HonorBoard />
             </aside>
           </div>
